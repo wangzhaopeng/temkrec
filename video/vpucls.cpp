@@ -88,6 +88,7 @@ static void FreeFrameBuf(framebuf *fb){
 	if (fb->desc.phy_addr)
 		IOFreePhyMem(&fb->desc);
 	delete fb;fb = NULL;
+//cout<<"FreeFrameBuf"<<endl;
 }
 
 ////return -1 err    0 ok
@@ -106,12 +107,12 @@ static int AllocEncoderFrameBuffer(Encoder *pEncoder){
 	if (pfbpool == NULL) 
 		return -1;
 
-	for (int i = 0; i < 4; i++){
+	for (int i = 0; i < 4+1; i++){
 		pfbpool[i] = AllocFrameBuf(pEncoder->m_nYUV420Widht, pEncoder->m_nYUV420Height);
 		if (pfbpool[i] == NULL)
 			return -1;
 	}
-	for (int i = 0; i < 4; i++){
+	for (int i = 0; i < 4+1; i++){
 		fb[i].myIndex = i;
 		fb[i].bufY = pfbpool[i]->addrY;
 		fb[i].bufCb = pfbpool[i]->addrCb;
@@ -126,22 +127,13 @@ static int AllocEncoderFrameBuffer(Encoder *pEncoder){
 		subSampBaseA, subSampBaseB, &extbufinfo);
 	if (ret != RETCODE_SUCCESS) 
 		return -1;
-	pfbpool[4] = AllocFrameBuf(pEncoder->m_nYUV420Widht, pEncoder->m_nYUV420Height);////////maybe on before
-	if (pfbpool[4] == NULL) 
-		return -1;
-	fb[4].myIndex = 4;
-	fb[4].bufY = pfbpool[4]->addrY;
-	fb[4].bufCb = pfbpool[4]->addrCb;
-	fb[4].bufCr = pfbpool[4]->addrCr;
-	fb[4].strideY = pfbpool[4]->strideY;
-	fb[4].strideC = pfbpool[4]->strideC;
+
 	return 0;
 }
 
 static void FreeEncoderFrameBuffer(Encoder *pEncoder)
 {
-	///////    5?
-	for (int i = 0; i<4; i++) {
+	for (int i = 0; i<4+1; i++) {
 		FreeFrameBuf(pEncoder->m_pFrameBufferPool[i]);
 	}
 	free(pEncoder->m_pFrameBuffer);
@@ -162,8 +154,12 @@ public:
 	int enc(const char* pYUV420Data,int len,bool bIFrame,char* pH264Data,int &H264Datalen);
 
 	int m_w,m_h,m_f;
-	void*m_enc;
+
 	vector<unsigned char>m_sps,m_pps;
+
+	void*m_enc;
+	void*mp_vpu_mem_desc;
+	void*mp_EncHandle;
 };
 
 vpucls::vpucls(const int w,const int h,const int f)
@@ -171,8 +167,6 @@ vpucls::vpucls(const int w,const int h,const int f)
 	m_w = w;
 	m_h = h;
 	m_f = f;
-	//vpu_Init(NULL);
-	m_enc =NULL;
 }
 
 vpucls::~vpucls(void)
@@ -182,8 +176,30 @@ vpucls::~vpucls(void)
 
 void vpucls::de_init(void)
 {
-	m_enc =NULL;
-	////free IOGetPhyMem
+	Encoder* pEncoder = (Encoder*)m_enc;
+	if(pEncoder){
+		FreeEncoderFrameBuffer(pEncoder);
+		RetCode ret = vpu_EncClose(pEncoder->m_nHandle);
+		if (ret == RETCODE_FRAME_NOT_COMPLETE){
+			vpu_SWReset(pEncoder->m_nHandle, 0);
+			vpu_EncClose(pEncoder->m_nHandle);
+		}
+
+		free(pEncoder);
+		m_enc =NULL;
+	}
+
+
+
+	vector<unsigned char>vtem;
+	m_sps=m_pps=vtem;
+
+	vpu_mem_desc *p_mem_desc = (vpu_mem_desc *)mp_vpu_mem_desc;
+	if(p_mem_desc){
+		IOFreeVirtMem(p_mem_desc);
+		IOFreePhyMem(p_mem_desc);
+		delete p_mem_desc;p_mem_desc = NULL;
+	}
 //vpu_UnInit();
 }
 
@@ -192,14 +208,22 @@ int vpucls::init(void){
 
 	vpu_Init(NULL);
 
-	vpu_mem_desc	mem_desc = {0};
-	mem_desc.size = STREAM_BUF_SIZE;
-	if (IOGetPhyMem(&mem_desc)){
+	m_enc = NULL;
+	mp_vpu_mem_desc = NULL;
+	mp_EncHandle = NULL;
+
+	mp_vpu_mem_desc = new vpu_mem_desc;
+	vpu_mem_desc *p_mem_desc = (vpu_mem_desc *)mp_vpu_mem_desc;
+	memset(p_mem_desc,0,sizeof(vpu_mem_desc));
+
+	p_mem_desc->size = STREAM_BUF_SIZE;
+	if (IOGetPhyMem(p_mem_desc)){
 		cerr<<__FILE__<<" "<<__FUNCTION__<<" "<<__LINE__<<" IOGetPhyMem err"<<endl;
+		delete p_mem_desc;p_mem_desc = NULL;
 		return -1;
 	}
 	EncOpenParam encop = {0};
-	encop.bitstreamBuffer = mem_desc.phy_addr;
+	encop.bitstreamBuffer = p_mem_desc->phy_addr;
 	encop.bitstreamBufferSize = STREAM_BUF_SIZE;
 	encop.bitstreamFormat = STD_AVC;
 	encop.mapType = 0;
@@ -249,14 +273,19 @@ int vpucls::init(void){
 	encop.EncStdParam.avcParam.avc_frameCropTop = 0;
 	encop.EncStdParam.avcParam.avc_frameCropBottom = 0;
 
-	EncHandle handle = {0};
-	RetCode ret = vpu_EncOpen(&handle, &encop);
+
+	mp_EncHandle = new EncHandle;
+	EncHandle *p_EncHandle = (EncHandle *)mp_EncHandle;
+	memset(p_EncHandle,0,sizeof(EncHandle));
+
+	RetCode ret = vpu_EncOpen(p_EncHandle, &encop);
 	if (ret != RETCODE_SUCCESS){
 		cerr<<__FILE__<<" "<<__FUNCTION__<<" "<<__LINE__<<" vpu_EncOpen err"<<endl;
+		delete p_EncHandle;p_EncHandle = NULL;
 		return -1;
 	}
 	EncInitialInfo initinfo = {0};
-	ret = vpu_EncGetInitialInfo(handle, &initinfo);
+	ret = vpu_EncGetInitialInfo(*p_EncHandle, &initinfo);
 	if (ret != RETCODE_SUCCESS) {
 		cerr<<__FILE__<<" "<<__FUNCTION__<<" "<<__LINE__<<" vpu_EncGetInitialInfo err"<<endl;
 		return -1;
@@ -266,11 +295,11 @@ int vpucls::init(void){
 		cerr<<__FILE__<<" "<<__FUNCTION__<<" "<<__LINE__<<" Encoder *pEncoder = new Encoder; err"<<endl;
 		return -1;
 	}
-	pEncoder->m_nVirtualAddr = IOGetVirtMem(&mem_desc);
-	pEncoder->m_nPhyAddr = mem_desc.phy_addr;
+	pEncoder->m_nVirtualAddr = IOGetVirtMem(p_mem_desc);
+	pEncoder->m_nPhyAddr = p_mem_desc->phy_addr;
 	pEncoder->m_nYUV420Widht = m_w;
 	pEncoder->m_nYUV420Height = m_h;
-	pEncoder->m_nHandle = handle;
+	pEncoder->m_nHandle = *p_EncHandle;
 	int nRet = AllocEncoderFrameBuffer(pEncoder);
 	if(nRet<0){
 		cerr<<__FILE__<<" "<<__FUNCTION__<<" "<<__LINE__<<" AllocEncoderFrameBuffer err"<<endl;
@@ -398,6 +427,18 @@ void test_vpu3(void){
 
 	int iret;
 	vpucls vpu_enc(w,h,f);
+
+{
+for(int i = 0; i< 250; i++)
+{
+	vpu_enc.init();
+vpu_enc.de_init();
+cout<<"................"<<i<<endl;
+}
+cout<<"sleep"<<endl;
+sleep(20);
+}
+
 	vpu_enc.init();
 
 	iret = vpu_enc.get_sps(v_sps);
@@ -408,7 +449,7 @@ void test_vpu3(void){
 
 	time_t sec = time(NULL);
 	cout <<ctime(&sec);
-	ofstream outh264("vpu2.264", ios::out | ios::binary);
+	ofstream outh264("vpufffde250.264", ios::out | ios::binary);
 	outh264.write((char*)&v_sps[0], v_sps.size()); outh264.write((char*)&v_pps[0], v_pps.size());
 
 	for(int sec = 0; sec < 10; sec++){
@@ -430,6 +471,41 @@ void test_vpu3(void){
 	sec = time(NULL);
 	cout <<ctime(&sec);
 
+	vpu_enc.de_init();
+	
+{
+	vpu_enc.init();
+
+	iret = vpu_enc.get_sps(v_sps);
+	iret = vpu_enc.get_pps(v_pps);
+
+	vector<unsigned char> v_0(w*h*3,0),v_f(w*h*3,0xff),v_h264(w*h*3);
+	int h264len;
+
+	time_t sec = time(NULL);
+	cout <<ctime(&sec);
+	ofstream outh264("vpufffde250-.264", ios::out | ios::binary);
+	outh264.write((char*)&v_sps[0], v_sps.size()); outh264.write((char*)&v_pps[0], v_pps.size());
+
+	for(int sec = 0; sec < 10; sec++){
+		bool bIFrame = true;
+		for(int i = 0; i<f;i++){
+			vpu_enc.enc((char*)&v_0[0],w*h*3/2,bIFrame,(char*)&v_h264[0],h264len);
+			bIFrame = false;
+			outh264.write((char*)&v_h264[0], h264len);
+		}
+
+		bIFrame = true;
+		for(int i = 0; i < f; i++){
+			vpu_enc.enc((char*)&v_f[0],w*h*3/2,bIFrame,(char*)&v_h264[0],h264len);
+			bIFrame = false;
+			outh264.write((char*)&v_h264[0], h264len);
+		}
+		cout << sec<<endl;
+	}
+	sec = time(NULL);
+	cout <<ctime(&sec);
+}
 }
 
 
