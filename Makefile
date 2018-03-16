@@ -5,8 +5,12 @@ all:RY-krec
 
 VIDEO_LIB = -L./video/lib #-lmp4v2 -lvpu -lpthread -ljpeg
 VIDEO_INC = -I./video -I./video/include
-VIDEO_SRC = ./video/cam_cap.cpp
-VIDEO_OBJ = ./video/cam_cap.o
+VIDEO_SRC = ./video/cam_cap.cpp \
+            ./video/rgb_bmp.cpp \
+            ./video/yuv2rgb.cpp
+VIDEO_OBJ = ./video/cam_cap.o \
+            ./video/rgb_bmp.o \
+            ./video/yuv2rgb.o
 
 MZMQ_LIB =
 MZMQ_INC =
@@ -64,4 +68,6 @@ clean:
 	cd m_zmq; rm -rf RY-krec *~ *.o *.d *.d.*
 	cd snd; rm -rf RY-krec *~ *.o *.d *.d.*
 
+cp:
+	cp RY-krec /home/rootfs/
 
