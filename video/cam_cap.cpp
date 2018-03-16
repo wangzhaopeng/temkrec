@@ -258,7 +258,7 @@ int cam_cap::start_capturing(void){
 }
 
 
-int cam_cap::query_frame(unsigned char *data){
+int cam_cap::query_frame(void *data){
 	struct v4l2_buffer capture_buf;
 
 	memset(&capture_buf, 0, sizeof(capture_buf));

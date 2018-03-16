@@ -20,7 +20,7 @@ public:
 	~cam_cap();
 	int init();
 	void de_init();
-	int query_frame(unsigned char *data);
+	int query_frame(void *data);
 private:
 	int v4l_capture_setup(void);
 	int start_capturing(void);

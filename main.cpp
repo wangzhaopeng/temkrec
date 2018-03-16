@@ -14,11 +14,13 @@ using namespace std;
 #include "rgb_bmp.h"
 
 #include "cam_cap.h"
+#include "VPUWraper.h"
 
 
 int main(int argc,char*argv[])
 {
-	test_cam();
+	//test_cam();
+	test_vpu();
 	return 0;
 }
 

@@ -3,21 +3,23 @@ CXX		= arm-linux-gnueabi-g++ #arm-none-linux-gnueabi-g++
 
 all:RY-krec
 
-VIDEO_LIB = -L./video/lib #-lmp4v2 -lvpu -lpthread -ljpeg
+VIDEO_LIB = -L./video/lib -lmp4v2 -lvpu -lpthread -ljpeg
 VIDEO_INC = -I./video -I./video/include
 VIDEO_SRC = ./video/cam_cap.cpp \
             ./video/rgb_bmp.cpp \
-            ./video/yuv2rgb.cpp
+            ./video/yuv2rgb.cpp \
+            ./video/VPUWraper.cpp
 VIDEO_OBJ = ./video/cam_cap.o \
             ./video/rgb_bmp.o \
-            ./video/yuv2rgb.o
+            ./video/yuv2rgb.o \
+            ./video/VPUWraper.o
 
 MZMQ_LIB =
 MZMQ_INC =
 MZMQ_SRC =
 MZMQ_OBJ =
 
-OPENCV_LIB = #-L./video/opencv/lib -lopencv_core
+OPENCV_LIB = -L./video/opencv/lib -lopencv_core
 OPENCV_INC = -I./video/opencv/include
 OPENCV_SRC =
 OPENCV_OBJ =
