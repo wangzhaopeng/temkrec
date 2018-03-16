@@ -8,11 +8,13 @@ VIDEO_INC = -I./video -I./video/include
 VIDEO_SRC = ./video/cam_cap.cpp \
             ./video/rgb_bmp.cpp \
             ./video/yuv2rgb.cpp \
-            ./video/VPUWraper.cpp
+            ./video/VPUWraper.cpp \
+            ./video/vpucls.cpp
 VIDEO_OBJ = ./video/cam_cap.o \
             ./video/rgb_bmp.o \
             ./video/yuv2rgb.o \
-            ./video/VPUWraper.o
+            ./video/VPUWraper.o \
+            ./video/vpucls.o
 
 MZMQ_LIB =
 MZMQ_INC =
