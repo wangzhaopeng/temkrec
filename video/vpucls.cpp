@@ -315,8 +315,9 @@ int vpucls::get_pps(vector<unsigned char>&pps){
 	return 0;
 }
 
+
 ////return -1 err    0 ok
-int vpucls::enc(const char* pYUV420Data,int len,bool bIFrame,char* pH264Data,int &H264Datalen){
+int vpucls::enc(const char* pYUV420Data,int len,bool bIFrame,std::vector<unsigned char>&v_h264){
 	if(!mb_IFrame_flag){
 		bIFrame = true;
 	}
@@ -345,11 +346,9 @@ int vpucls::enc(const char* pYUV420Data,int len,bool bIFrame,char* pH264Data,int
 		return -1;
 	}
 	int nLoop = 0;
-	while (vpu_IsBusy()) 
-	{
+	while (vpu_IsBusy()) {
 		vpu_WaitForInt(200);
-		if (nLoop == 20) 
-		{
+		if (nLoop == 20){
 			cerr<<__FILE__<<" "<<__FUNCTION__<<" "<<__LINE__<<" vpu_WaitForInt(200)*20"<<endl;
 			cout << "err vpu_SWReset "<<endl;
 			ret = vpu_SWReset(*(EncHandle*)mp_EncHandle, 0);
@@ -366,8 +365,10 @@ int vpucls::enc(const char* pYUV420Data,int len,bool bIFrame,char* pH264Data,int
 	}
 
 	unsigned long nVirtualBufferAddr = m_virt_addr + (outinfo.bitstreamBuffer - m_phy_addr);
-	memcpy(pH264Data,(char*)nVirtualBufferAddr,outinfo.bitstreamSize);
-	H264Datalen = outinfo.bitstreamSize;
+
+	v_h264.clear();
+	v_h264.insert(v_h264.begin(),(unsigned char*)nVirtualBufferAddr,(unsigned char*)nVirtualBufferAddr+outinfo.bitstreamSize);
+
 	return 0;
 }
 
@@ -413,16 +414,16 @@ void test_vpu3(void){
 	for(int sec = 0; sec < 20; sec++){
 		bool bIFrame = true;
 		for(int i = 0; i<f;i++){
-			vpu_enc.enc((char*)&v_0[0],w*h*3/2,bIFrame,(char*)&v_h264[0],h264len);
+			vpu_enc.enc((char*)&v_0[0],w*h*3/2,bIFrame,v_h264);
 			bIFrame = false;
-			outh264.write((char*)&v_h264[0], h264len);
+			outh264.write((char*)&v_h264[0], v_h264.size());
 		}
 
 		bIFrame = true;
 		for(int i = 0; i < f; i++){
-			vpu_enc.enc((char*)&v_f[0],w*h*3/2,bIFrame,(char*)&v_h264[0],h264len);
+			vpu_enc.enc((char*)&v_0[0],w*h*3/2,bIFrame,v_h264);
 			bIFrame = false;
-			outh264.write((char*)&v_h264[0], h264len);
+			outh264.write((char*)&v_h264[0], v_h264.size());
 		}
 		cout << sec<<endl;
 	}
