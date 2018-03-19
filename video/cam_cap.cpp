@@ -60,7 +60,7 @@ void cam_cap::de_init(void){
 		if(m_capture_buffers[i].start){
 			munmap(m_capture_buffers[i].start, m_capture_buffers[i].length);
 			memset(&m_capture_buffers[i],0,sizeof(m_capture_buffers[i]));
-			cout << "munmap: "<<i<<endl;
+			//cout << "munmap: "<<i<<endl;
 		}
 	}
 	if(m_dev_h>=0){
@@ -258,7 +258,7 @@ int cam_cap::start_capturing(void){
 }
 
 
-int cam_cap::query_frame(void *data){
+int cam_cap::query_frame(unsigned char *data){
 	struct v4l2_buffer capture_buf;
 
 	memset(&capture_buf, 0, sizeof(capture_buf));

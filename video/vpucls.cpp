@@ -391,7 +391,7 @@ void test_vpu3(void){
 	vpucls vpu_enc(w,h,f);
 	vpu_enc.init();
 
-#if 1
+#if 0
 {
 	for(int i = 0; i< 250; i++){
 		vpu_enc.de_init();
@@ -414,7 +414,7 @@ void test_vpu3(void){
 	ofstream outh264("vpu19.264", ios::out | ios::binary);
 	outh264.write((char*)&v_sps[0], v_sps.size()); outh264.write((char*)&v_pps[0], v_pps.size());
 
-while(1)
+//while(1)
 	for(int sec = 0; sec < 20; sec++){
 		bool bIFrame = true;
 		for(int i = 0; i<f;i++){

@@ -20,9 +20,9 @@ using namespace std;
 
 
 int main(int argc,char*argv[]){
-	//test_cam();
+	test_cam();
 	//test_vpu();
-	test_vpu3();
+	//test_vpu3();
 	return 0;
 }
 
