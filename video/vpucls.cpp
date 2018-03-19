@@ -38,20 +38,18 @@ public:
 class Encoder
 {
 public:
-	ExtBufCfg m_struExtBufCfg;
+	//ExtBufCfg m_struExtBufCfg;
 };
 
 
-static framebuf* AllocFrameBuf(int weight, int height)
-{
+static framebuf* AllocFrameBuf(int weight, int height){
 	framebuf *fb = new framebuf;
 	if (fb == NULL)
 		return NULL;
 	memset(&(fb->desc), 0, sizeof(vpu_mem_desc));
 	fb->desc.size = (weight * height  + weight / 2 * height / 2 * 2);
 	int err = IOGetPhyMem(&fb->desc);
-	if (err) 
-	{
+	if (err){
 		delete fb;fb = NULL;
 		return NULL;
 	}
@@ -63,8 +61,7 @@ static framebuf* AllocFrameBuf(int weight, int height)
 	fb->strideC =  weight / 2;
 
 	fb->desc.virt_uaddr = IOGetVirtMem(&(fb->desc));
-	if (fb->desc.virt_uaddr <= 0)
-	{
+	if (fb->desc.virt_uaddr <= 0){
 		IOFreePhyMem(&fb->desc);
 		delete fb;fb = NULL;
 		return NULL;
@@ -104,9 +101,10 @@ private:
 	void*mp_EncHandle;
 	void **m_pFrameBufferPool;
 	void *m_pFrameBuffer;
-
 	unsigned long m_phy_addr;
 	unsigned long m_virt_addr;
+	//ExtBufCfg m_struExtBufCfg;
+
 	void FreeEncoderFrameBuffer(Encoder *pEncoder);
 	int AllocEncoderFrameBuffer(Encoder *pEncoder);
 };
@@ -311,7 +309,7 @@ int vpucls::AllocEncoderFrameBuffer(Encoder *pEncoder){
 	}
 	subSampBaseA = fb[2].bufY;
 	subSampBaseB = fb[3].bufY;
-	extbufinfo.scratchBuf = pEncoder->m_struExtBufCfg;
+	//extbufinfo.scratchBuf = pEncoder->m_struExtBufCfg;
 	ret = vpu_EncRegisterFrameBuffer(handle, fb, 2, m_w, m_w,
 		subSampBaseA, subSampBaseB, &extbufinfo);
 	if (ret != RETCODE_SUCCESS) 
@@ -452,7 +450,7 @@ sleep(20);
 
 	time_t sec = time(NULL);
 	cout <<ctime(&sec);
-	ofstream outh264("vpu0.264", ios::out | ios::binary);
+	ofstream outh264("vpu18.264", ios::out | ios::binary);
 	outh264.write((char*)&v_sps[0], v_sps.size()); outh264.write((char*)&v_pps[0], v_pps.size());
 
 	for(int sec = 0; sec < 10; sec++){
@@ -487,7 +485,7 @@ sleep(20);
 
 	time_t sec = time(NULL);
 	cout <<ctime(&sec);
-	ofstream outh264("vpu1.264", ios::out | ios::binary);
+	ofstream outh264("vpu182.264", ios::out | ios::binary);
 	outh264.write((char*)&v_sps[0], v_sps.size()); outh264.write((char*)&v_pps[0], v_pps.size());
 
 	for(int sec = 0; sec < 10; sec++){
