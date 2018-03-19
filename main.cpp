@@ -16,13 +16,15 @@ using namespace std;
 #include "cam_cap.h"
 #include "VPUWraper.h"
 #include "vpucls.h"
+#include "cam_h264.h"
 
 
 
 int main(int argc,char*argv[]){
-	test_cam();
+	//test_cam();
 	//test_vpu();
 	//test_vpu3();
+	tst_cam264();
 	return 0;
 }
 

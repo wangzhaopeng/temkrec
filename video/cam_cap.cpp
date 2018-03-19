@@ -71,6 +71,7 @@ void cam_cap::de_init(void){
 	}
 }
 
+/////return 0 ok   -1 err
 int cam_cap::init(){
 	v4l2_std_id id;
 	int iret;
@@ -79,26 +80,27 @@ int cam_cap::init(){
 	if (m_dev_h < 0){
 		printf("Unable to open %s\n",mstr_dev.c_str());
 		de_init();
-		return m_dev_h;
+		return -1;
 	}
 
 	iret = v4l_capture_setup();
 	if (iret < 0) {
 		printf("Setup v4l capture failed.\n");
 		de_init();
-		return iret;
+		return -1;
 	}
 
 	iret = start_capturing();
 	if (iret < 0) {
 		printf("start_capturing failed\n");
 		de_init();
-		return iret;
+		return -1;
 	}
 
-	return m_dev_h;
+	return 0;
 }
 
+/////return 0 ok   -1 err
 int cam_cap::v4l_capture_setup(void){
 	struct v4l2_capability cap;
 	struct v4l2_cropcap cropcap;
@@ -210,7 +212,7 @@ int cam_cap::v4l_capture_setup(void){
 	return 0;
 }
 
-
+/////return 0 ok   -1 err
 int cam_cap::start_capturing(void){
 	unsigned int i, j;
 	struct v4l2_buffer buf;
@@ -257,8 +259,8 @@ int cam_cap::start_capturing(void){
 	return 0;
 }
 
-
-int cam_cap::query_frame(unsigned char *data){
+/////return 0 ok   -1 err
+int cam_cap::query_frame(void *data){
 	struct v4l2_buffer capture_buf;
 
 	memset(&capture_buf, 0, sizeof(capture_buf));
