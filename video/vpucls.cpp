@@ -319,6 +319,7 @@ int vpucls::get_pps(vector<unsigned char>&pps){
 ////return -1 err    0 ok
 int vpucls::enc(const char* pYUV420Data,int len,bool bIFrame,std::vector<unsigned char>&v_h264){
 	if(!mb_IFrame_flag){
+		mb_IFrame_flag = true;
 		bIFrame = true;
 	}
 
@@ -367,7 +368,9 @@ int vpucls::enc(const char* pYUV420Data,int len,bool bIFrame,std::vector<unsigne
 	unsigned long nVirtualBufferAddr = m_virt_addr + (outinfo.bitstreamBuffer - m_phy_addr);
 
 	v_h264.clear();
+//cout << "v_h264 size "<<v_h264.size();
 	v_h264.insert(v_h264.begin(),(unsigned char*)nVirtualBufferAddr,(unsigned char*)nVirtualBufferAddr+outinfo.bitstreamSize);
+//cout << " v_h264 size2 "<<v_h264.size()<<endl;
 
 	return 0;
 }
@@ -411,6 +414,7 @@ void test_vpu3(void){
 	ofstream outh264("vpu19.264", ios::out | ios::binary);
 	outh264.write((char*)&v_sps[0], v_sps.size()); outh264.write((char*)&v_pps[0], v_pps.size());
 
+while(1)
 	for(int sec = 0; sec < 20; sec++){
 		bool bIFrame = true;
 		for(int i = 0; i<f;i++){
@@ -421,7 +425,7 @@ void test_vpu3(void){
 
 		bIFrame = true;
 		for(int i = 0; i < f; i++){
-			vpu_enc.enc((char*)&v_0[0],w*h*3/2,bIFrame,v_h264);
+			vpu_enc.enc((char*)&v_f[0],w*h*3/2,bIFrame,v_h264);
 			bIFrame = false;
 			outh264.write((char*)&v_h264[0], v_h264.size());
 		}
