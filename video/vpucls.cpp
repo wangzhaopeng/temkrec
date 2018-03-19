@@ -317,7 +317,7 @@ int vpucls::get_pps(vector<unsigned char>&pps){
 
 
 ////return -1 err    0 ok
-int vpucls::enc(const char* pYUV420Data,int len,bool bIFrame,std::vector<unsigned char>&v_h264){
+int vpucls::enc(const void* pYUV420Data,int len,bool bIFrame,std::vector<unsigned char>&v_h264){
 	if(!mb_IFrame_flag){
 		mb_IFrame_flag = true;
 		bIFrame = true;
@@ -418,14 +418,14 @@ void test_vpu3(void){
 	for(int sec = 0; sec < 20; sec++){
 		bool bIFrame = true;
 		for(int i = 0; i<f;i++){
-			vpu_enc.enc((char*)&v_0[0],w*h*3/2,bIFrame,v_h264);
+			vpu_enc.enc(&v_0[0],w*h*3/2,bIFrame,v_h264);
 			bIFrame = false;
 			outh264.write((char*)&v_h264[0], v_h264.size());
 		}
 
 		bIFrame = true;
 		for(int i = 0; i < f; i++){
-			vpu_enc.enc((char*)&v_f[0],w*h*3/2,bIFrame,v_h264);
+			vpu_enc.enc(&v_f[0],w*h*3/2,bIFrame,v_h264);
 			bIFrame = false;
 			outh264.write((char*)&v_h264[0], v_h264.size());
 		}

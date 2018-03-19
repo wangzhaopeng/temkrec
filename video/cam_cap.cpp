@@ -261,6 +261,19 @@ int cam_cap::start_capturing(void){
 
 /////return 0 ok   -1 err
 int cam_cap::query_frame(void *data){
+	void*p;
+	int iret = query_frame_p(&p);
+	if(iret<0){
+		return -1;
+	}
+	if(data!=NULL){
+		memcpy(data, p, m_frame_size);
+	}
+	return 0;
+}
+
+/////return 0 ok   -1 err
+int cam_cap::query_frame_p(void **pp){
 	struct v4l2_buffer capture_buf;
 
 	memset(&capture_buf, 0, sizeof(capture_buf));
@@ -274,8 +287,8 @@ int cam_cap::query_frame(void *data){
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	
-	if(data!=NULL){
-		memcpy(data, m_capture_buffers[capture_buf.index].start, m_frame_size);
+	if(pp!=NULL){
+		*pp = m_capture_buffers[capture_buf.index].start;
 	}
 
 	struct timeval tv2;

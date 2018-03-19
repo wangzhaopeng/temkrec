@@ -11,7 +11,7 @@ public:
 	void de_init(void);
 	int get_sps(std::vector<unsigned char>&sps);
 	int get_pps(std::vector<unsigned char>&pps);
-	int enc(const char* pYUV420Data,int len,bool bIFrame,std::vector<unsigned char>&v_h264);
+	int enc(const void* pYUV420Data,int len,bool bIFrame,std::vector<unsigned char>&v_h264);
 
 private:
 	int m_w,m_h,m_f;

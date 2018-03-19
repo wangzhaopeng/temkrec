@@ -1,5 +1,7 @@
 
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <iostream>
 #include <fstream>
 using namespace std;
@@ -119,7 +121,7 @@ int cam_h264::run(void){
 	time_t last_sec;
 	int iret;
 
-ofstream outh264("cam.264", ios::out | ios::binary);
+ofstream outh264("campp-.264", ios::out | ios::binary);
 {
 vector<unsigned char> sps,pps;
 pvpu->get_sps(sps);
@@ -130,8 +132,9 @@ outh264.write((char*)&sps[0], sps.size()); outh264.write((char*)&pps[0], pps.siz
 	//outh264.write((char*)&v_sps[0], v_sps.size()); outh264.write((char*)&v_pps[0], v_pps.size());
 
 	while(!m_thread_exitflag){
-
-		iret = pcam->query_frame(&vuc[0]);
+		void*pcamdata;
+		//iret = pcam->query_frame(&vuc[0]);
+iret = pcam->query_frame_p(&pcamdata);
 		if(iret!=0){
 			cerr<<__FILE__<<" "<<__FUNCTION__<<" pcam->query_frame err"<<endl;
 		}
@@ -147,7 +150,9 @@ outh264.write((char*)&sps[0], sps.size()); outh264.write((char*)&pps[0], pps.siz
 		}
 
 		vector<unsigned char>v_h264;
-		iret = pvpu->enc((char*)&vuc[0],m_w*m_h*3/2,bIFrame,v_h264);
+//memcpy(&vuc[0],pcamdata,m_w*m_h*3/2);
+		//iret = pvpu->enc((char*)&vuc[0],m_w*m_h*3/2,bIFrame,v_h264);
+iret = pvpu->enc(pcamdata,m_w*m_h*3/2,bIFrame,v_h264);
 		if(iret!=0){
 			cerr<<__FILE__<<" "<<__FUNCTION__<<" pvpu->enc err"<<endl;
 		}
