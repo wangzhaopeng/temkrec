@@ -12,6 +12,7 @@ using namespace std;
 #include "vpucls.h"
 #include "toollib.h"
 #include "frame_mng.h"
+#include "yuvaddtime.h"
 
 #include "cam_h264.h"
 
@@ -105,7 +106,7 @@ int cam_h264::run(void){
 	vector<unsigned char>vuc(1920*1080*4);
 	time_t last_sec=0;
 	int iret;
-
+int idx = 0;
 	while(!m_thread_exitflag){
 		void*pcamdata;
 		iret = pcam->query_frame_p(&pcamdata);
@@ -115,7 +116,7 @@ int cam_h264::run(void){
 			exit(-1);
 		}
 
-		time_t sec=syssec();
+		time_t sec=syssec();//cout<<sec<<" "<<idx++<<endl;
 
 		bool bIFrame=false;
 		if(sec!=last_sec){
@@ -123,10 +124,12 @@ int cam_h264::run(void){
 			bIFrame = true;
 		}
 
-		//vector<unsigned char>v_h264;
+		struct timeval time_ms;
+		gettimeofday(&time_ms, NULL);
+		//yuv420addtime((unsigned char *)pcamdata,m_w,m_h,time_ms.tv_sec,time_ms.tv_usec/1000);///picture add time
+
 
 		shared_ptr<TYPE_VU8> spv = make_shared<TYPE_VU8>();
-		//iret = pvpu->enc(pcamdata,m_w*m_h*3/2,bIFrame,v_h264);
 		iret = pvpu->enc(pcamdata,m_w*m_h*3/2,bIFrame,*spv);
 		if(iret!=0){
 			cerr<<__FILE__<<" "<<__FUNCTION__<<" pvpu->enc err"<<endl;
@@ -150,8 +153,8 @@ int cam_h264::get_pps(std::vector<unsigned char>&pps){
 	return ((vpucls*)mp_vpu)->get_pps(pps);
 }
 void tst_cam264(void){
-	int w = 640,h=480,f=30;
-	char *dev = "/dev/video0";
+	int w = 1280,h=720,f=30;
+	char *dev = "/dev/video1";
 
 	cam_h264 cam264(dev,w,h,f);
 	cam264.init();
