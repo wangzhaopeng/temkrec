@@ -3,6 +3,7 @@
 
 #include <string>
 #include <thread>
+#include <vector>
 #include "pthread.h"
 
 

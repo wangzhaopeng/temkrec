@@ -14,7 +14,8 @@ VIDEO_SRC = ./video/cam_cap.cpp \
             ./video/toollib.cpp \
             ./video/frame_mng.cpp \
             ./video/yuvaddtime.cpp \
-            ./video/yuvadd.cpp
+            ./video/yuvadd.cpp \
+            ./video/video_mng.cpp
 VIDEO_OBJ = ./video/cam_cap.o \
             ./video/rgb_bmp.o \
             ./video/yuv2rgb.o \
@@ -24,7 +25,8 @@ VIDEO_OBJ = ./video/cam_cap.o \
             ./video/toollib.o \
             ./video/frame_mng.o \
             ./video/yuvaddtime.o \
-            ./video/yuvadd.o
+            ./video/yuvadd.o \
+            ./video/video_mng.o
 
 MZMQ_LIB =
 MZMQ_INC =
