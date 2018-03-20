@@ -368,9 +368,8 @@ int vpucls::enc(const void* pYUV420Data,int len,bool bIFrame,std::vector<unsigne
 	unsigned long nVirtualBufferAddr = m_virt_addr + (outinfo.bitstreamBuffer - m_phy_addr);
 
 	v_h264.clear();
-//cout << "v_h264 size "<<v_h264.size();
+
 	v_h264.insert(v_h264.begin(),(unsigned char*)nVirtualBufferAddr,(unsigned char*)nVirtualBufferAddr+outinfo.bitstreamSize);
-//cout << " v_h264 size2 "<<v_h264.size()<<endl;
 
 	return 0;
 }
