@@ -10,13 +10,17 @@ VIDEO_SRC = ./video/cam_cap.cpp \
             ./video/yuv2rgb.cpp \
             ./video/VPUWraper.cpp \
             ./video/vpucls.cpp \
-            ./video/cam_h264.cpp
+            ./video/cam_h264.cpp \
+            ./video/toollib.cpp \
+            ./video/frame_mng.cpp 
 VIDEO_OBJ = ./video/cam_cap.o \
             ./video/rgb_bmp.o \
             ./video/yuv2rgb.o \
             ./video/VPUWraper.o \
             ./video/vpucls.o \
-            ./video/cam_h264.o
+            ./video/cam_h264.o \
+            ./video/toollib.o \
+            ./video/frame_mng.o
 
 MZMQ_LIB =
 MZMQ_INC =
