@@ -3,9 +3,12 @@
 
 #include <time.h>
 #include <pthread.h>
-struct s_thread_recmp4{
+
+struct s_video_para{
+	void*mp_cam264;
 	bool m_rec_flag;
 	time_t m_rec_sec;
+	pthread_t m_thread;
 };
 
 class video_mng{
@@ -19,15 +22,8 @@ public:
 	void recmp4(int idx);
 
 	bool m_thread_exitflag;
-	//bool m_rec_flag;
-	//time_t m_rec_sec;
 
-
-	struct s_thread_recmp4 m_recmp4_para[2];
-	pthread_t m_thread_recmp4[2];
-
-	void*mp_cam264_0;
-	void*mp_cam264_1;
+	struct s_video_para m_video_para[2];
 };
 
 void tst_vmng(void);
