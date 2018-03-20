@@ -17,14 +17,15 @@ using namespace std;
 #include "VPUWraper.h"
 #include "vpucls.h"
 #include "cam_h264.h"
-
+#include "video_mng.h"
 
 
 int main(int argc,char*argv[]){
 	//test_cam();
 	//test_vpu();
 	//test_vpu3();
-	tst_cam264();
+	//tst_cam264();
+	tst_vmng();
 	return 0;
 }
 

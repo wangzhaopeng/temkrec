@@ -40,7 +40,7 @@ void cam_h264::de_init(void){
 
 	if(m_thread){
 		pthread_join(m_thread,NULL);
-		cout <<"pthread_join(m_thread,NULL); "<<endl;
+		cout <<"cam_h264 pthread_join(m_thread,NULL); "<<endl;
 	}
 
 	if(mp_cam){
