@@ -17,7 +17,7 @@ public:
 	bool write_a(const char *pd, int size);
 
 	//video
-	bool init_v(int width,int height, int frameRate,const std::vector<char>&v_sps,const std::vector<char>&v_pps);
+	bool init_v(int width,int height, int frameRate,const std::vector<unsigned char>&v_sps,const std::vector<unsigned char>&v_pps);
 	bool write_v(const char *pd, int size);
 
 private:
