@@ -88,7 +88,7 @@ bool mymp4::write_a(const char *pd, int size)
 }
 
 
-bool mymp4::init_v(int width,int height,int frame_rate,const std::vector<unsigned char>&v_sps,const std::vector<unsigned char>&v_pps)
+bool mymp4::init_v(int width,int height,int frame_rate,const std::vector<char>&v_sps,const std::vector<char>&v_pps)
 {
 	m_v_width = width;
 	m_v_height = height;

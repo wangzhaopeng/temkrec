@@ -11,6 +11,14 @@ struct s_video_para{
 	pthread_t m_thread;
 };
 
+struct s_snd_para{
+	void *mp_pcm;
+	void *mp_aac;
+	void*mp_pcmqueue;
+	void*mp_aacqueue;
+	pthread_t m_thread;
+};
+
 class video_mng{
 public:
 	//video_mng(void){}
@@ -18,12 +26,16 @@ public:
 	int init(void);
 	int de_init(void);
 
+	int init_snd(void);
+	void de_init_snd(void);
+
 	void rec(time_t sec);
 	void recmp4(int idx);
+	void aacenc(int);
 
 	bool m_thread_exitflag;
-
 	struct s_video_para m_video_para[2];
+	struct s_snd_para m_snd_para;
 };
 
 void tst_vmng(void);

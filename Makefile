@@ -3,7 +3,7 @@ CXX		= arm-linux-gnueabi-g++ #arm-none-linux-gnueabi-g++
 
 all:RY-krec
 
-VIDEO_LIB = -L./video/lib -lmp4v2 -lvpu -lpthread -ljpeg
+VIDEO_LIB = -L./video/lib -lmp4v2 -lvpu -lpthread -ljpeg -lfaac -lasound
 VIDEO_INC = -I./video -I./video/include
 VIDEO_SRC = ./video/cam_cap.cpp \
             ./video/rgb_bmp.cpp \
@@ -16,7 +16,9 @@ VIDEO_SRC = ./video/cam_cap.cpp \
             ./video/yuvaddtime.cpp \
             ./video/yuvadd.cpp \
             ./video/video_mng.cpp \
-            ./video/mymp4.cpp
+            ./video/mymp4.cpp \
+            ./video/snd_pcm.cpp \
+            ./video/myaac.cpp
 VIDEO_OBJ = ./video/cam_cap.o \
             ./video/rgb_bmp.o \
             ./video/yuv2rgb.o \
@@ -28,7 +30,9 @@ VIDEO_OBJ = ./video/cam_cap.o \
             ./video/yuvaddtime.o \
             ./video/yuvadd.o \
             ./video/video_mng.o \
-            ./video/mymp4.o
+            ./video/mymp4.o \
+            ./video/snd_pcm.o \
+            ./video/myaac.o
 
 MZMQ_LIB =
 MZMQ_INC =

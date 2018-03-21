@@ -18,7 +18,7 @@ using namespace std;
 #include "vpucls.h"
 #include "cam_h264.h"
 #include "video_mng.h"
-
+#include "snd_pcm.h"
 
 int main(int argc,char*argv[]){
 	//test_cam();
@@ -26,6 +26,7 @@ int main(int argc,char*argv[]){
 	//test_vpu3();
 	//tst_cam264();
 	tst_vmng();
+	//tst_pcm();
 	return 0;
 }
 
