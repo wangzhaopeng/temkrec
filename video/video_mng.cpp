@@ -102,6 +102,7 @@ int video_mng::init(void){
 void video_mng::recmp4(int idx){
 	cam_h264 * p_cam264 = (cam_h264 *)(m_video_para[idx].mp_cam264);
 	while(!m_thread_exitflag){
+
 		if(m_video_para[idx].m_rec_flag){
 			m_video_para[idx].m_rec_flag = false;
 			cout <<idx<<" "<<m_video_para[idx].m_rec_sec<<endl;
@@ -110,61 +111,28 @@ void video_mng::recmp4(int idx){
 			sprintf(fname,"%d-%d.mp4",(int)m_video_para[idx].m_rec_sec,idx);
 			cout<<fname<<endl;
 
-
-	mymp4 o_mp4;
-	bool bret=o_mp4.init(fname);
-	if(!bret){
-		cout<<"o_mp4.init false "<<fname<<endl;
-		exit(0);
-	}
-	int iret;
-	vector<unsigned char> v_sps,v_pps;
-	iret = p_cam264->get_sps(v_sps);
-	if(iret!=0){
-		cout<<"p_cam264->get_sps(v_sps); err   cam idx:"<<idx<<endl;
-		exit(0);
-	}
-	iret = p_cam264->get_pps(v_pps);
-	if(iret!=0){
-		cout<<"p_cam264->get_pps(v_pps); err   cam idx:"<<idx<<endl;
-		exit(0);
-	}
-	o_mp4.init_v(1280,720,30,v_sps,v_pps);
-
-
-	int sec = syssec();
-	for(int i = 0; i < 10; ){
-		int iret ;
-		vector<vector<unsigned char>> vv_sec;
-		iret = p_cam264->get_sec(sec,vv_sec);
-		if(iret == 0){
-			sleep(1);
-			continue;
-		}
-		i++;
-		sec++;
-		for(int i = 0; i < vv_sec.size(); i++){
-			//outh264.write((char*)&vv_sec[i][0],vv_sec[i].size());
-			bret = o_mp4.write_v((char*)&vv_sec[i][4], vv_sec[i].size()-4);
+			mymp4 o_mp4;
+			bool bret=o_mp4.init(fname);
 			if(!bret){
-					cout<<"o_mp4.write_v false "<<fname<<endl;
-					exit(0);
+				cout<<"o_mp4.init false "<<fname<<endl;
+				sleep(1);exit(-1);
 			}
-		}
-	}
-
-
-
-#if 0
-			char fname[64];
-			sprintf(fname,"%d-%d.264",(int)m_video_para[idx].m_rec_sec,idx);
-			cout<<fname<<endl;
-
-			////////write h264 file
-			ofstream outh264(fname, ios::out | ios::binary);
+			int iret;
 			vector<unsigned char> v_sps,v_pps;
-			p_cam264->get_sps(v_sps);p_cam264->get_pps(v_pps);
-			outh264.write((char*)&v_sps[0], v_sps.size()); outh264.write((char*)&v_pps[0], v_pps.size());
+			iret = p_cam264->get_sps(v_sps);
+			if(iret!=0){
+				cout<<"p_cam264->get_sps(v_sps); err   cam idx:"<<idx<<endl;
+				sleep(1);exit(-1);
+			}
+			iret = p_cam264->get_pps(v_pps);
+			if(iret!=0){
+				cout<<"p_cam264->get_pps(v_pps); err   cam idx:"<<idx<<endl;
+				sleep(1);exit(-1);
+			}
+			vector<unsigned char> v_sps2,v_pps2;
+			v_sps2.insert(v_sps2.end(),v_sps.begin()+4,v_sps.end());
+			v_pps2.insert(v_pps2.end(),v_pps.begin()+4,v_pps.end());
+			o_mp4.init_v(p_cam264->m_w,p_cam264->m_h,p_cam264->m_f,v_sps2,v_pps2);
 
 			int sec = syssec();
 			for(int i = 0; i < 10; ){
@@ -178,12 +146,15 @@ void video_mng::recmp4(int idx){
 				i++;
 				sec++;
 				for(int i = 0; i < vv_sec.size(); i++){
-					outh264.write((char*)&vv_sec[i][0],vv_sec[i].size());
+					bret = o_mp4.write_v((char*)&vv_sec[i][4], vv_sec[i].size()-4);
+					if(!bret){
+							cout<<"o_mp4.write_v false "<<fname<<endl;
+							sleep(1);exit(-1);
+					}
 				}
 			}
-#endif
 		}
-		usleep(1000);
+		usleep(100*1000);
 	}
 }
 

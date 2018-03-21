@@ -112,8 +112,7 @@ int idx = 0;
 		iret = pcam->query_frame_p(&pcamdata);
 		if(iret!=0){
 			cerr<<__FILE__<<" "<<__FUNCTION__<<" pcam->query_frame err"<<endl;
-			sleep(1);
-			exit(-1);
+			sleep(1);exit(-1);
 		}
 
 		time_t sec=syssec();//cout<<sec<<" "<<idx++<<endl;
@@ -133,8 +132,7 @@ int idx = 0;
 		iret = pvpu->enc(pcamdata,m_w*m_h*3/2,bIFrame,*spv);
 		if(iret!=0){
 			cerr<<__FILE__<<" "<<__FUNCTION__<<" pvpu->enc err"<<endl;
-			sleep(1);
-			exit(-1);
+			sleep(1);exit(-1);
 		}
 		((frame_mng*)mp_h264queue)->add_frame(sec,spv);
 	}
