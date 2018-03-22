@@ -280,7 +280,6 @@ int cam_cap::query_frame(void *data){
 		memcpy(data, (void*)m_capture_buffers[capture_buf.index].start, m_frame_size);
 	}
 
-
 	if (ioctl(m_dev_h, VIDIOC_QBUF, &capture_buf) < 0) {
 		printf("VIDIOC_QBUF failed\n");
 		return -1;

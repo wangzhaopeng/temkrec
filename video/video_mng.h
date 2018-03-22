@@ -7,16 +7,16 @@
 struct s_video_para{
 	void*mp_cam264;
 	bool m_rec_flag;
-	time_t m_rec_sec;
+	time_t m_rec_begin_syssec;
 	pthread_t m_thread;
 };
 
 struct s_snd_para{
 	void *mp_pcm;
-	void *mp_aac;
 	void*mp_pcmqueue;
-	void*mp_aacqueue;
+	time_t m_rec_begin_syssec;
 	pthread_t m_thread;
+	pthread_t m_thread_aac;
 };
 
 class video_mng{

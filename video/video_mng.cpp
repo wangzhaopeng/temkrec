@@ -25,6 +25,7 @@ using namespace std;
 #define SND_BITS		16
 
 #define V_REC_SEC		10
+#define V_BACK_SEC		5
 
 typedef void (video_mng::*pthread_f)(int);
 struct thread_para{
@@ -140,19 +141,7 @@ int video_mng::init_snd(void){
 	}
 	m_snd_para.mp_pcm = p_pcm;
 
-	int bret;
-	myaac *p_aac = new myaac(SND_HZ,SND_CHANNEL,SND_BITS);
-	bret = p_aac->init();
-	if(bret==false){
-		cout <<__FILE__<<" "<<__FUNCTION__<<" p_aac->init err "<<endl;
-		delete p_aac;
-		de_init();
-		return -1;
-	}
-	m_snd_para.mp_aac = p_aac;
-
 	m_snd_para.mp_pcmqueue = new frame_mng();
-	m_snd_para.mp_aacqueue = new frame_mng();
 
 	struct thread_para * p_th_para;
 	p_th_para = new struct thread_para;
@@ -175,16 +164,18 @@ void video_mng::de_init_snd(void){
 		cout <<" m_snd_para pthread_join "<<endl;
 		m_snd_para.m_thread = 0;
 	}
+
+
+	frame_mng *p_pcmqueue = (frame_mng *)m_snd_para.mp_pcmqueue;
+	if(p_pcmqueue){
+		cout <<" de_init pcm que"<<endl;
+		delete p_pcmqueue; p_pcmqueue = NULL;
+	}
+	
 	snd_pcm *p_pcm = (snd_pcm *)(m_snd_para.mp_pcm);
 	if(p_pcm){
 		cout <<" de_init pcm "<<endl;
 		delete p_pcm; p_pcm = NULL;
-	}
-
-	myaac *p_aac = (myaac *)m_snd_para.mp_aac;
-	if(p_aac){
-		cout <<" de_init aac "<<endl;
-		delete p_aac;p_aac=NULL;
 	}
 }
 
@@ -200,10 +191,9 @@ void video_mng::recmp4(int idx){
 		}
 
 		m_video_para[idx].m_rec_flag = false;
-		//cout <<idx<<" "<<m_video_para[idx].m_rec_sec<<endl;
 
 		char fname[64];
-		sprintf(fname,"%d-%d.mp4",(int)m_video_para[idx].m_rec_sec,idx);
+		sprintf(fname,"%d-%d.mp4",(int)m_video_para[idx].m_rec_begin_syssec,idx);
 		cout<<fname<<endl;
 
 		mymp4 o_mp4;
@@ -233,7 +223,7 @@ void video_mng::recmp4(int idx){
 			sleep(1);exit(-1);
 		}
 
-		int sec = syssec();
+		int sec = m_video_para[idx].m_rec_begin_syssec;
 		for(int i = 0; i < V_REC_SEC; ){
 			int iret ;
 			vector<vector<unsigned char>> vv_sec;
@@ -299,17 +289,12 @@ void video_mng::recmp4(int idx){
 
 void video_mng::aacenc(int iarg){
 	snd_pcm *p_pcm = (snd_pcm *)(m_snd_para.mp_pcm);
-	myaac *p_aac = (myaac *)m_snd_para.mp_aac;
 	frame_mng *p_pcmque=(frame_mng *)m_snd_para.mp_pcmqueue;
-	frame_mng *p_aacque=(frame_mng *)m_snd_para.mp_aacqueue;
 
-
-	cout <<"p_aac->get_input_samples() "<<p_aac->get_input_samples()<<endl;
 	cout <<"p_pcm->size "<<p_pcm->size<<endl;
 	int idx = 0;
 	int iret;
 	while(!m_thread_exitflag){
-
 		iret = p_pcm->read();
 		if(iret != 0){
 			cout<<" p_pcm->read false "<<endl;
@@ -328,7 +313,7 @@ void video_mng::rec(time_t sec){
 	cout<<"video_mng::rec "<<sec<<endl;
 
 	m_video_para[0].m_rec_flag=m_video_para[1].m_rec_flag=true;
-	m_video_para[0].m_rec_sec=m_video_para[1].m_rec_sec=sec;
+	m_video_para[0].m_rec_begin_syssec=m_video_para[1].m_rec_begin_syssec=sec;
 }
 
 void tst_vmng(void){
@@ -336,7 +321,7 @@ void tst_vmng(void){
 	vmng.init();
 	while(1){
 		sleep(20);
-		vmng.rec(time(NULL));
+		vmng.rec(syssec()-V_BACK_SEC);
 		//sleep(180);
 	}
 }
