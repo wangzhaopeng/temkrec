@@ -12,7 +12,6 @@ using namespace std;
 #include "vpucls.h"
 #include "toollib.h"
 #include "frame_mng.h"
-#include "yuvaddtime.h"
 
 #include "cam_h264.h"
 
@@ -98,40 +97,16 @@ int cam_h264::init(void){
 	}
 }
 
-
-
 int cam_h264::run(void){
 	vpucls *pvpu = (vpucls*)mp_vpu;
 	cam_cap*pcam = (cam_cap*)mp_cam;
-	vector<unsigned char>vuc(1920*1080*4);
-	time_t last_sec=0;
 	int iret;
-int idx = 0;
 	while(!m_thread_exitflag){
-		void*pcamdata;
-		iret = pcam->query_frame_p(&pcamdata);
+		time_t sec;
+		shared_ptr<TYPE_VU8> spv = make_shared<TYPE_VU8>();
+		iret = pcam->query_frame(pvpu,sec,*spv);
 		if(iret!=0){
 			cerr<<__FILE__<<" "<<__FUNCTION__<<" pcam->query_frame err"<<endl;
-			sleep(1);exit(-1);
-		}
-
-		time_t sec=syssec();//cout<<sec<<" "<<idx++<<endl;
-
-		bool bIFrame=false;
-		if(sec!=last_sec){
-			last_sec = sec;
-			bIFrame = true;
-		}
-
-		struct timeval time_ms;
-		gettimeofday(&time_ms, NULL);
-		//yuv420addtime((unsigned char *)pcamdata,m_w,m_h,time_ms.tv_sec,time_ms.tv_usec/1000);///picture add time
-
-
-		shared_ptr<TYPE_VU8> spv = make_shared<TYPE_VU8>();
-		iret = pvpu->enc(pcamdata,m_w*m_h*3/2,bIFrame,*spv);
-		if(iret!=0){
-			cerr<<__FILE__<<" "<<__FUNCTION__<<" pvpu->enc err"<<endl;
 			sleep(1);exit(-1);
 		}
 		((frame_mng*)mp_h264queue)->add_frame(sec,spv);
@@ -160,7 +135,7 @@ void tst_cam264(void){
 	while(1){
 	
 		char fname[64];
-		sprintf(fname,"%d.264",syssec());
+		sprintf(fname,"%d.264",(int)syssec());
 		ofstream outh264(fname, ios::out | ios::binary);
 		vector<unsigned char> v_sps,v_pps;
 		cam264.get_sps(v_sps);cam264.get_pps(v_pps);
@@ -179,6 +154,7 @@ void tst_cam264(void){
 			for(int i = 0; i < vv_sec.size(); i++){
 				outh264.write((char*)&vv_sec[i][0],vv_sec[i].size());
 			}
+			//cout <<" i "<<i<<endl;
 		}
 		cout <<fname<<endl;
 	

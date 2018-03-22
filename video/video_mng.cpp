@@ -310,7 +310,7 @@ void video_mng::aacenc(int iarg){
 	int iret;
 	while(!m_thread_exitflag){
 
-		iret = p_pcm->read();//cout<<time(NULL)<<" "<<idx++<<endl;
+		iret = p_pcm->read();
 		if(iret != 0){
 			cout<<" p_pcm->read false "<<endl;
 			sleep(1);exit(-1);
@@ -319,10 +319,7 @@ void video_mng::aacenc(int iarg){
 		time_t sec=syssec();
 		shared_ptr<TYPE_VU8> spv = make_shared<TYPE_VU8>();
 		spv->insert(spv->end(),p_pcm->buffer,p_pcm->buffer+p_pcm->size);
-		p_pcmque->add_frame(sec,spv);//cout<<time(NULL)<<" "<<idx++<<" "<<spv->size()<<" "<<p_pcm->frames<<endl;
-
-//vector<char> v_aac;
-//p_aac->pcm2aac(p_pcm->buffer,p_pcm->frames,v_aac);//cout<<time(NULL)<<" "<<idx++<<" "<<v_aac.size()<<endl;
+		p_pcmque->add_frame(sec,spv);
 	}
 }
 

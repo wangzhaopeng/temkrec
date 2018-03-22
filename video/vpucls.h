@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include "cam_cap.h"
+
 class vpucls{
 public:
 	vpucls(const int w,const int h,const int f=30);
@@ -11,8 +13,9 @@ public:
 	void de_init(void);
 	int get_sps(std::vector<unsigned char>&sps);
 	int get_pps(std::vector<unsigned char>&pps);
-	int enc(const void* pYUV420Data,int len,bool bIFrame,std::vector<unsigned char>&v_h264);
+	int enc(const void* pYUV420Data,bool bIFrame,std::vector<unsigned char>&v_h264);
 
+	friend class cam_cap;
 private:
 	int m_w,m_h,m_f;
 

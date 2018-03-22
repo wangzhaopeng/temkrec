@@ -2,7 +2,10 @@
 #ifndef __CAM_CAP_H__
 #define __CAM_CAP_H__
 
+#include <time.h>
 #include <string>
+#include <vector>
+
 
 struct data_buffer
 {
@@ -13,6 +16,7 @@ struct data_buffer
 
 #include <linux/videodev2.h>
 
+
 class cam_cap 
 {
 public:
@@ -21,10 +25,11 @@ public:
 	int init();
 	void de_init();
 	int query_frame(void *data);
-	int query_frame_p(void **pp);
+	int query_frame(void*pvpu,time_t &sec,std::vector<unsigned char> &v_h264);
 private:
 	int v4l_capture_setup(void);
 	int start_capturing(void);
+	int enc264(void*pvpu,unsigned char*pd,time_t &sec,std::vector<unsigned char> &v_h264);
 
 public:
 	int m_width;
@@ -32,7 +37,6 @@ public:
 	int m_frame_size;
 	int m_frame_rate;
 private:
-	//char m_dev_name[100];//v4l_capture_dev[100];
 	std::string mstr_dev;
 	int m_dev_h;
 	int m_input;
@@ -40,6 +44,7 @@ private:
 	int m_capture_num_buffers;
 	struct data_buffer m_capture_buffers[4];
 	bool mb_onflag;
+	time_t m_last_sec;
 };
 
 void test_cam(void);

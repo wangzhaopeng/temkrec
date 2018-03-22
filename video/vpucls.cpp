@@ -317,14 +317,14 @@ int vpucls::get_pps(vector<unsigned char>&pps){
 
 
 ////return -1 err    0 ok
-int vpucls::enc(const void* pYUV420Data,int len,bool bIFrame,std::vector<unsigned char>&v_h264){
+int vpucls::enc(const void* pYUV420Data,bool bIFrame,std::vector<unsigned char>&v_h264){
 	if(!mb_IFrame_flag){
 		mb_IFrame_flag = true;
 		bIFrame = true;
 	}
 
 	int nImageLen = m_w * m_h * 3 / 2;
-	if(pYUV420Data == NULL || len != nImageLen)
+	if(pYUV420Data == NULL)
 		return -1;
 	EncParam  enc_param = {0};
 	FrameBuffer * p_framebuffer = (FrameBuffer *)m_pFrameBuffer;
@@ -340,7 +340,7 @@ int vpucls::enc(const void* pYUV420Data,int len,bool bIFrame,std::vector<unsigne
 	enc_param.encTopOffset = 0;
 	framebuf *pfb = (framebuf *)m_pFrameBufferPool[4];
 	unsigned long y_addr = pfb->addrY + pfb->desc.virt_uaddr - pfb->desc.phy_addr;
-	memcpy((char*)y_addr,pYUV420Data,len);
+	memcpy((char*)y_addr,pYUV420Data,nImageLen);
 	RetCode ret = vpu_EncStartOneFrame(*(EncHandle*)mp_EncHandle, &enc_param);
 	if ( ret != RETCODE_SUCCESS){ 
 		cerr<<__FILE__<<" "<<__FUNCTION__<<" "<<__LINE__<<" vpu_EncStartOneFrame err"<<" ret: "<<ret<<endl;
@@ -417,14 +417,14 @@ void test_vpu3(void){
 	for(int sec = 0; sec < 20; sec++){
 		bool bIFrame = true;
 		for(int i = 0; i<f;i++){
-			vpu_enc.enc(&v_0[0],w*h*3/2,bIFrame,v_h264);
+			vpu_enc.enc(&v_0[0],bIFrame,v_h264);
 			bIFrame = false;
 			outh264.write((char*)&v_h264[0], v_h264.size());
 		}
 
 		bIFrame = true;
 		for(int i = 0; i < f; i++){
-			vpu_enc.enc(&v_f[0],w*h*3/2,bIFrame,v_h264);
+			vpu_enc.enc(&v_f[0],bIFrame,v_h264);
 			bIFrame = false;
 			outh264.write((char*)&v_h264[0], v_h264.size());
 		}

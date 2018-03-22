@@ -27,21 +27,21 @@
 #include <vector>
 using namespace std;
 
+#include "toollib.h"
+#include "vpucls.h"
+#include "yuvaddtime.h"
 #include "cam_cap.h"
 
 
 
 cam_cap::cam_cap(const char *dev, int width, int height, int frame_rate, int pix_fmt){
 	mstr_dev = dev;
-	m_dev_h = -1;
 	m_input = 1;
 	m_fmt = pix_fmt;
 	m_width = width;
 	m_height = height;
 	m_frame_rate = frame_rate;
 	m_capture_num_buffers = 4;
-	memset(m_capture_buffers,0,sizeof(m_capture_buffers));
-	mb_onflag = false;
 }
 
 cam_cap::~cam_cap(){
@@ -73,6 +73,11 @@ void cam_cap::de_init(void){
 
 /////return 0 ok   -1 err
 int cam_cap::init(){
+	m_last_sec = 0;
+	m_dev_h = -1;
+	memset(m_capture_buffers,0,sizeof(m_capture_buffers));
+	mb_onflag = false;
+
 	v4l2_std_id id;
 	int iret;
 
@@ -261,19 +266,44 @@ int cam_cap::start_capturing(void){
 
 /////return 0 ok   -1 err
 int cam_cap::query_frame(void *data){
-	void*p;
-	int iret = query_frame_p(&p);
-	if(iret<0){
+	struct v4l2_buffer capture_buf;
+
+	memset(&capture_buf, 0, sizeof(capture_buf));
+	capture_buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	capture_buf.memory = V4L2_MEMORY_MMAP;
+	if (ioctl(m_dev_h, VIDIOC_DQBUF, &capture_buf) < 0) {
+		printf("VIDIOC_DQBUF failed.\n");
 		return -1;
 	}
+	
 	if(data!=NULL){
-		memcpy(data, p, m_frame_size);
+		memcpy(data, (void*)m_capture_buffers[capture_buf.index].start, m_frame_size);
+	}
+
+
+	if (ioctl(m_dev_h, VIDIOC_QBUF, &capture_buf) < 0) {
+		printf("VIDIOC_QBUF failed\n");
+		return -1;
 	}
 	return 0;
 }
 
+int cam_cap::enc264(void*pvpu,unsigned char*pd,time_t &sec,vector<unsigned char> &v_h264){
+	bool bIFrame = false;
+	sec = syssec();
+	if(sec!=m_last_sec){
+		m_last_sec = sec;
+		bIFrame = true;
+	}
+
+	yuv420addtime(pd,m_width,m_height,getsec(),getms());///picture add time
+
+	vpucls *p_vpu = (vpucls *)pvpu;
+	return p_vpu->enc(pd,bIFrame,v_h264);
+}
+
 /////return 0 ok   -1 err
-int cam_cap::query_frame_p(void **pp){
+int cam_cap::query_frame(void*pvpu,time_t &sec,vector<unsigned char> &v_h264){
 	struct v4l2_buffer capture_buf;
 
 	memset(&capture_buf, 0, sizeof(capture_buf));
@@ -284,22 +314,14 @@ int cam_cap::query_frame_p(void **pp){
 		return -1;
 	}
 
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-	
-	if(pp!=NULL){
-		*pp = m_capture_buffers[capture_buf.index].start;
-	}
-
-	struct timeval tv2;
-	gettimeofday(&tv2, NULL);
-	//cout << tv2.tv_sec-tv.tv_sec<<" sec "<< (tv2.tv_usec-tv.tv_usec)/1000<<" ms"<<endl;
+	int icfret=enc264(pvpu,(unsigned char*)m_capture_buffers[capture_buf.index].start,sec,v_h264);
 
 	if (ioctl(m_dev_h, VIDIOC_QBUF, &capture_buf) < 0) {
 		printf("VIDIOC_QBUF failed\n");
 		return -1;
 	}
-	return 0;
+	
+	return icfret;
 }
 
 #include "yuv2rgb.h"
