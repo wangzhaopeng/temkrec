@@ -295,7 +295,7 @@ int cam_cap::enc264(void*pvpu,unsigned char*pd,time_t &sec,vector<unsigned char>
 		bIFrame = true;
 	}
 
-	yuv420addtime(pd,m_width,m_height,getsec(),getms());///picture add time
+	yuv420addtime(pd,m_width,m_height,getsec(),getms()%1000);///picture add time
 
 	vpucls *p_vpu = (vpucls *)pvpu;
 	return p_vpu->enc(pd,bIFrame,v_h264);
