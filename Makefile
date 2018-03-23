@@ -18,7 +18,8 @@ VIDEO_SRC = ./video/cam_cap.cpp \
             ./video/video_mng.cpp \
             ./video/mymp4.cpp \
             ./video/snd_pcm.cpp \
-            ./video/myaac.cpp
+            ./video/myaac.cpp \
+            ./video/pcm_aac.cpp
 VIDEO_OBJ = ./video/cam_cap.o \
             ./video/rgb_bmp.o \
             ./video/yuv2rgb.o \
@@ -32,7 +33,8 @@ VIDEO_OBJ = ./video/cam_cap.o \
             ./video/video_mng.o \
             ./video/mymp4.o \
             ./video/snd_pcm.o \
-            ./video/myaac.o
+            ./video/myaac.o \
+            ./video/pcm_aac.o
 
 MZMQ_LIB =
 MZMQ_INC =

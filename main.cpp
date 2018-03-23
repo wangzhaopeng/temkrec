@@ -19,6 +19,7 @@ using namespace std;
 #include "cam_h264.h"
 #include "video_mng.h"
 #include "snd_pcm.h"
+#include "pcm_aac.h"
 
 int main(int argc,char*argv[]){
 	//test_cam();
@@ -27,6 +28,7 @@ int main(int argc,char*argv[]){
 	//tst_cam264();
 	tst_vmng();
 	//tst_pcm();
+	//tst_pcmaac();
 	return 0;
 }
 

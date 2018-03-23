@@ -26,6 +26,14 @@ int frame_mng::get_sec_frame(int sec, std::vector<TYPE_VU8> &v_sec){
 
 	pthread_mutex_lock(&m_mutex);
 	map<int, vector<TYPE_SPVU8>>::iterator it;
+	if(m_fmap.size() > 0){
+		it = m_fmap.begin();
+		if(sec<it->first){
+			cerr << __FILE__ << " " << __FUNCTION__ << " req sec < min map sec " << sec << endl;
+			pthread_mutex_unlock(&m_mutex);
+			return -1;
+		}
+	}
 	it = m_fmap.find(sec);
 	if (it == m_fmap.end()){
 		pthread_mutex_unlock(&m_mutex);
